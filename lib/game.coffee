@@ -1,7 +1,7 @@
 canvas = ''
 gl = ''
 
-squareVerticesBuffer = ''
+squareVerticesBuffer1 = ''
 squareVerticesColorBuffer = ''
 squareXOffset = 0.0
 squareYOffset = 0.0
@@ -82,11 +82,11 @@ initBuffers = ->
 
   ## Create a buffer for the square's vertices.
 
-  squareVerticesBuffer = gl.createBuffer()
+  squareVerticesBuffer1 = gl.createBuffer()
 
-  ## Select the squareVerticesBuffer as the one to apply vertex
+  ## Select the squareVerticesBuffer1 as the one to apply vertex
   ## operations to from here out.
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer1)
 
   ## Now create an array of vertices for the square. Note that the Z
   ## coordinate is always 0 here.
@@ -143,7 +143,7 @@ drawScene = ->
 
   ## Draw the square by binding the array buffer to the square's vertices
   ## array, setting attributes, and pushing it to GL.
-  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer1)
   gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
 
   ## Set the colors attribute for the vertices.

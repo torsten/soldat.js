@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>Soldat</title>
-  <script type="text/javascript" src="lib/glMatrix.js"></script>
+  <script src="lib/sylvester.src.js"></script>
+  <script src="lib/glUtils.js"></script>
   <script src="lib/game.js"></script>
   <script id="shader-fs" type="x-shader/x-fragment">
       #ifdef GL_ES
@@ -27,8 +28,6 @@
   </script>
 </head>
 <body>
-  <canvas id="glcanvas" width="500" height="500">
-    Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
-  </canvas>
+  <canvas id="glcanvas" width="640" height="480"></canvas>
 </body>
 </html>

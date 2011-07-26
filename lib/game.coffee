@@ -1,19 +1,43 @@
 canvas = ''
 gl = ''
+
 squareVerticesBuffer = ''
+squareVerticesColorBuffer = ''
+squareXOffset = 0.0
+squareYOffset = 0.0
+squareZOffset = 0.0
+lastSquareUpdateTime = 0
+xIncValue = 0.2
+yIncValue = -0.4
+zIncValue = 0.3
+
 mvMatrix = ''
 shaderProgram = ''
 vertexPositionAttribute = ''
+vertexColorAttribute = ''
 perspectiveMatrix = ''
 
 ##
 ## start
 ##
 ## Called when the canvas is created to get the ball rolling.
-## Figuratively, that is. There's nothing moving in this demo.
 ##
 window.onload = ->
-  canvas = document.getElementById("glcanvas")
+  canvas = $("#glcanvas")[0]
+  $('body').keydown (event) =>
+    k = event.keyCode || event.which
+    switch k
+      when 37 # left
+        updateOffsets(-1, 0, 0)
+      when 38 # up
+        updateOffsets(0, 1, 0)
+      when 39 # right
+        updateOffsets(1, 0, 0)
+      when 40 # down
+        updateOffsets(0, -1, 0)
+
+    drawScene()
+
   initWebGL(canvas)      ## Initialize the GL context
 
   ## Only continue if WebGL is available and working
@@ -23,16 +47,17 @@ window.onload = ->
     gl.enable(gl.DEPTH_TEST)           ## Enable depth testing
     gl.depthFunc(gl.LEQUAL)            ## Near things obscure far things
 
-    ## Initialize the shaders this is where all the lighting for the
+    ## Initialize the shaders; this is where all the lighting for the
     ## vertices and so forth is established.
-    initShaders()
 
+    initShaders()
     ## Here's where we call the routine that builds all the objects
     ## we'll be drawing.
-    initBuffers()
 
+    initBuffers()
     ## Set up to draw the scene periodically.
-    setInterval(drawScene, 15)
+
+    drawScene()
 
 ##
 ## initWebGL
@@ -48,8 +73,7 @@ initWebGL = ->
   catch e
 
   ## If we don't have a GL context, give up now
-  if (!gl)
-    alert("Unable to initialize WebGL. Your browser may not support it.")
+  alert("Unable to initialize WebGL. Your browser may not support it.") if !gl
 
 ##
 ## initBuffers
@@ -58,7 +82,9 @@ initWebGL = ->
 ## one object -- a simple two-dimensional square.
 ##
 initBuffers = ->
+
   ## Create a buffer for the square's vertices.
+
   squareVerticesBuffer = gl.createBuffer()
 
   ## Select the squareVerticesBuffer as the one to apply vertex
@@ -79,6 +105,18 @@ initBuffers = ->
   ## then use it to fill the current vertex buffer.
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
 
+  ## Now set up the colors for the vertices
+  colors = [
+    1.0,  1.0,  1.0,  1.0,    ## white
+    1.0,  0.0,  0.0,  1.0,    ## red
+    0.0,  1.0,  0.0,  1.0,    ## green
+    0.0,  0.0,  1.0,  1.0     ## blue
+  ]
+
+  squareVerticesColorBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer)
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
+
 ##
 ## drawScene
 ##
@@ -89,7 +127,7 @@ drawScene = ->
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
   ## Establish the perspective with which we want to view the
-  ## scene. Our field of view is 45 degrees, with a width#height
+  ## scene. Our field of view is 45 degrees, with a width/height
   ## ratio of 640:480, and we only want to see objects between 0.1 units
   ## and 100 units away from the camera.
   perspectiveMatrix = makePerspective(45, 640.0/480.0, 0.1, 100.0)
@@ -102,13 +140,32 @@ drawScene = ->
   ## drawing the square.
   mvTranslate([-0.0, 0.0, -99.0])
 
+  ## Save the current matrix, then rotate before we draw.
+  mvPushMatrix()
+  mvTranslate([squareXOffset, squareYOffset, squareZOffset])
+
   ## Draw the square by binding the array buffer to the square's vertices
   ## array, setting attributes, and pushing it to GL.
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer)
   gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
+
+  ## Set the colors attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer)
+  gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0)
+
+  ## Draw the square.
   setMatrixUniforms()
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
+  ## Restore the original matrix
+  mvPopMatrix()
+
+  ## Update the rotation for the next draw, if it's time to do so.
+
+updateOffsets = (x, y, z) ->
+  squareXOffset += x
+  squareYOffset += y
+  squareZOffset += z
 
 ##
 ## initShaders
@@ -129,10 +186,14 @@ initShaders = ->
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS))
     alert("Unable to initialize the shader program.")
 
+
   gl.useProgram(shaderProgram)
 
   vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition")
   gl.enableVertexAttribArray(vertexPositionAttribute)
+
+  vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor")
+  gl.enableVertexAttribArray(vertexColorAttribute)
 
 
 ##
@@ -144,12 +205,11 @@ initShaders = ->
 getShader = (gl, id) ->
   shaderScript = document.getElementById(id)
 
-  ## Didn't find an element with the specified ID abort.
+  ## Didn't find an element with the specified ID; abort.
   return null if (!shaderScript)
 
   ## Walk through the source element's children, building the
   ## shader source string.
-
   theSource = ""
   currentChild = shaderScript.firstChild
 
@@ -157,9 +217,10 @@ getShader = (gl, id) ->
     theSource += currentChild.textContent if (currentChild.nodeType == 3)
     currentChild = currentChild.nextSibling
 
+
   ## Now figure out what type of shader script we have,
   ## based on its MIME type.
-  shader = ''
+  shader
 
   if (shaderScript.type == "x-shader/x-fragment")
     shader = gl.createShader(gl.FRAGMENT_SHADER)
@@ -180,7 +241,6 @@ getShader = (gl, id) ->
     alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader))
     return null
 
-
   return shader
 
 
@@ -191,11 +251,14 @@ getShader = (gl, id) ->
 loadIdentity = ->
   mvMatrix = Matrix.I(4)
 
+
 multMatrix = (m) ->
   mvMatrix = mvMatrix.x(m)
 
+
 mvTranslate = (v) ->
   multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4())
+
 
 setMatrixUniforms = ->
   pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix")
@@ -204,4 +267,26 @@ setMatrixUniforms = ->
   mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix")
   gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()))
 
+
+mvMatrixStack = []
+
+mvPushMatrix = (m) ->
+  if (m)
+    mvMatrixStack.push(m.dup())
+    mvMatrix = m.dup()
+  else
+    mvMatrixStack.push(mvMatrix.dup())
+
+
+
+mvPopMatrix = ->
+  throw("Can't pop from an empty matrix stack.") if (!mvMatrixStack.length)
+
+  mvMatrix = mvMatrixStack.pop()
+
+mvRotate = (angle, v) ->
+  inRadians = angle * Math.PI / 180.0
+
+  m = Matrix.Rotation(inRadians, $V([v[0], v[1], v[2]])).ensure4x4()
+  multMatrix(m)
 

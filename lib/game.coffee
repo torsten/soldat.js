@@ -6,10 +6,6 @@ squareVerticesColorBuffer = ''
 squareXOffset = 0.0
 squareYOffset = 0.0
 squareZOffset = 0.0
-lastSquareUpdateTime = 0
-xIncValue = 0.2
-yIncValue = -0.4
-zIncValue = 0.3
 
 mvMatrix = ''
 shaderProgram = ''
@@ -28,15 +24,16 @@ window.onload = ->
     k = event.keyCode || event.which
     switch k
       when 37 # left
-        updateOffsets(-1, 0, 0)
+        updateOffsets(-2, 0, 0)
       when 38 # up
-        updateOffsets(0, 1, 0)
+        updateOffsets(0, 2, 0)
       when 39 # right
-        updateOffsets(1, 0, 0)
+        updateOffsets(2, 0, 0)
       when 40 # down
-        updateOffsets(0, -1, 0)
+        updateOffsets(0, -2, 0)
 
     drawScene()
+    $('#position').text(squareXOffset + ', ' + squareYOffset)
 
   initWebGL(canvas)      ## Initialize the GL context
 

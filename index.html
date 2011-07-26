@@ -3,10 +3,31 @@
 <head>
   <meta charset="utf-8">
   <title>Soldat</title>
+  <script type="text/javascript" src="lib/glMatrix.js"></script>
   <script src="lib/game.js"></script>
+  <script id="shader-fs" type="x-shader/x-fragment">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+
+      void main(void) {
+          gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      }
+  </script>
+
+  <script id="shader-vs" type="x-shader/x-vertex">
+      attribute vec3 aVertexPosition;
+
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+
+      void main(void) {
+          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+      }
+  </script>
 </head>
 <body>
-  <canvas id="glcanvas" width="640" height="480">
+  <canvas id="glcanvas" width="500" height="500">
     Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
   </canvas>
 </body>

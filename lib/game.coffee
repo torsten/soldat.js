@@ -2,10 +2,16 @@ canvas = ''
 gl = ''
 
 squareVerticesBuffer1 = ''
+squareVerticesBuffer2 = ''
 squareVerticesColorBuffer = ''
-squareXOffset = 0.0
-squareYOffset = 0.0
-squareZOffset = 0.0
+squareXOffset1 = 0.0
+squareYOffset1 = 0.0
+squareZOffset1 = 0.0
+
+squareXOffset2 = 0.0
+squareYOffset2 = 0.0
+squareZOffset2 = 0.0
+
 
 mvMatrix = ''
 shaderProgram = ''
@@ -31,9 +37,17 @@ window.onload = ->
         updateOffsets(2, 0, 0)
       when 40 # down
         updateOffsets(0, -2, 0)
+      when 65 # a
+        updateEnemyOffsets(-2, 0, 0)
+      when 87 # up
+        updateEnemyOffsets(0, 2, 0)
+      when 68 # right
+        updateEnemyOffsets(2, 0, 0)
+      when 83 # down
+        updateEnemyOffsets(0, -2, 0)
 
     drawScene()
-    $('#position').text(squareXOffset + ', ' + squareYOffset)
+    $('#position').text(squareXOffset1 + ', ' + squareYOffset1)
 
   initWebGL(canvas)      ## Initialize the GL context
 
@@ -81,12 +95,32 @@ initWebGL = ->
 initBuffers = ->
 
   ## Create a buffer for the square's vertices.
-
   squareVerticesBuffer1 = gl.createBuffer()
 
   ## Select the squareVerticesBuffer1 as the one to apply vertex
   ## operations to from here out.
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer1)
+
+  ## Now create an array of vertices for the square. Note that the Z
+  ## coordinate is always 0 here.
+  vertices = [
+    1.0,  1.0,  0.0,
+    -1.0, 1.0,  0.0,
+    1.0,  -1.0, 0.0,
+    -1.0, -1.0, 0.0
+  ]
+
+  ## Now pass the list of vertices into WebGL to build the shape. We
+  ## do this by creating a Float32Array from the JavaScript array,
+  ## then use it to fill the current vertex buffer.
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW)
+
+  ## Create a buffer for the square's vertices.
+  squareVerticesBuffer2 = gl.createBuffer()
+
+  ## Select the squareVerticesBuffer1 as the one to apply vertex
+  ## operations to from here out.
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer2)
 
   ## Now create an array of vertices for the square. Note that the Z
   ## coordinate is always 0 here.
@@ -139,7 +173,7 @@ drawScene = ->
 
   ## Save the current matrix, then rotate before we draw.
   mvPushMatrix()
-  mvTranslate([squareXOffset, squareYOffset, squareZOffset])
+  mvTranslate([squareXOffset1, squareYOffset1, squareZOffset1])
 
   ## Draw the square by binding the array buffer to the square's vertices
   ## array, setting attributes, and pushing it to GL.
@@ -157,12 +191,36 @@ drawScene = ->
   ## Restore the original matrix
   mvPopMatrix()
 
-  ## Update the rotation for the next draw, if it's time to do so.
+    ## Save the current matrix, then rotate before we draw.
+  mvPushMatrix()
+  mvTranslate([squareXOffset2, squareYOffset2, squareZOffset2])
+
+  ## Draw the square by binding the array buffer to the square's vertices
+  ## array, setting attributes, and pushing it to GL.
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer2)
+  gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
+
+  ## Set the colors attribute for the vertices.
+  gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer)
+  gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0)
+
+  ## Draw the square.
+  setMatrixUniforms()
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+
+  ## Restore the original matrix
+  mvPopMatrix()
+
 
 updateOffsets = (x, y, z) ->
-  squareXOffset += x
-  squareYOffset += y
-  squareZOffset += z
+  squareXOffset1 += x
+  squareYOffset1 += y
+  squareZOffset1 += z
+
+updateEnemyOffsets = (x, y, z) ->
+  squareXOffset2 += x
+  squareYOffset2 += y
+  squareZOffset2 += z
 
 ##
 ## initShaders

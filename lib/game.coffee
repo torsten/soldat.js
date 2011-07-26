@@ -274,8 +274,6 @@ mvPushMatrix = (m) ->
   else
     mvMatrixStack.push(mvMatrix.dup())
 
-
-
 mvPopMatrix = ->
   throw("Can't pop from an empty matrix stack.") if (!mvMatrixStack.length)
 

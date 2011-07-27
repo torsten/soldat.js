@@ -18,7 +18,7 @@ vertexPositionAttribute = ''
 vertexColorAttribute = ''
 perspectiveMatrix = ''
 
-socket = io.connect('http://127.0.0.1:1234');
+socket = io.connect('http://192.168.2.46:1234');
 
 ##
 ## start

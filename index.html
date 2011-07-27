@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Soldat</title>
   <script src="lib/jquery.min.js"></script>
+  <script src="http://localhost:1234/socket.io/socket.io.js"></script>
   <script src="lib/sylvester.src.js"></script>
   <script src="lib/glUtils.js"></script>
   <script src="lib/game.js"></script>
@@ -32,6 +33,8 @@
   <p>&nbsp;</p>
   <p>Use arrows to move player one and wasd for player two.</p>
   <p>Current position: [<span id='position'>0, 0</span>]</p>
+  <p>Enemy position:   [<span id='enemy_position'>0, 0</span>]</p>
   <canvas id="glcanvas" width="640" height="480"></canvas>
 </body>
 </html>
+

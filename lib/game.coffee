@@ -19,6 +19,8 @@ vertexPositionAttribute = ''
 vertexColorAttribute = ''
 perspectiveMatrix = ''
 
+socket = io.connect('http://127.0.0.1:1234');
+
 ##
 ## start
 ##
@@ -45,9 +47,11 @@ window.onload = ->
         updateEnemyOffsets(2, 0, 0)
       when 83 # down
         updateEnemyOffsets(0, -2, 0)
-
+    socket.emit('position_update', { x: squareXOffset1, y: squareYOffset1 })
     drawScene()
-    $('#position').text(squareXOffset1 + ', ' + squareYOffset1)
+  socket.on 'message', (msg) ->
+    setEnemyOffsets(msg.x, msg.y, 0)
+    drawScene()
 
   initWebGL(canvas)      ## Initialize the GL context
 
@@ -210,6 +214,8 @@ drawScene = ->
 
   ## Restore the original matrix
   mvPopMatrix()
+  $('#position').text(squareXOffset1 + ', ' + squareYOffset1)
+  $('#enemy_position').text(squareXOffset2 + ', ' + squareYOffset2)
 
 
 updateOffsets = (x, y, z) ->
@@ -221,6 +227,11 @@ updateEnemyOffsets = (x, y, z) ->
   squareXOffset2 += x
   squareYOffset2 += y
   squareZOffset2 += z
+
+setEnemyOffsets = (x, y, z) ->
+  squareXOffset2 = x
+  squareYOffset2 = y
+  squareZOffset2 = z
 
 ##
 ## initShaders

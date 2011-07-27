@@ -12,7 +12,6 @@ squareXOffset2 = 0.0
 squareYOffset2 = 0.0
 squareZOffset2 = 0.0
 
-
 mvMatrix = ''
 shaderProgram = ''
 vertexPositionAttribute = ''
@@ -72,6 +71,7 @@ window.onload = ->
     initBuffers()
     ## Set up to draw the scene periodically.
 
+    initTexture()
     drawScene()
 
 ##
@@ -108,10 +108,10 @@ initBuffers = ->
   ## Now create an array of vertices for the square. Note that the Z
   ## coordinate is always 0 here.
   vertices = [
-    1.0,  1.0,  0.0,
-    -1.0, 1.0,  0.0,
-    1.0,  -1.0, 0.0,
-    -1.0, -1.0, 0.0
+    2.0,  2.0,  0.0,
+    -2.0, 2.0,  0.0,
+    2.0,  -2.0, 0.0,
+    -2.0, -2.0, 0.0
   ]
 
   ## Now pass the list of vertices into WebGL to build the shape. We
@@ -152,6 +152,25 @@ initBuffers = ->
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer)
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
 
+playerTexture = ''
+initTexture = ->
+  playerTexture = gl.createTexture()
+  playerTexture.image = new Image()
+  playerTexture.image.onload = ->
+    handleLoadedTexture(playerTexture)
+
+  playerTexture.image.src = "images/cube.gif"
+  return
+
+handleLoadedTexture = (texture) ->
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+  gl.generateMipmap(gl.TEXTURE_2D)
+  gl.bindTexture(gl.TEXTURE_2D, null)
+  return
+
 ##
 ## drawScene
 ##
@@ -183,6 +202,10 @@ drawScene = ->
   ## array, setting attributes, and pushing it to GL.
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer1)
   gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0)
+
+  gl.activeTexture(gl.TEXTURE0)
+  gl.bindTexture(gl.TEXTURE_2D, playerTexture)
+  gl.uniform1i(shaderProgram.samplerUniform, 0)
 
   ## Set the colors attribute for the vertices.
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer)

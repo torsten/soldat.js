@@ -1,3 +1,4 @@
 .DS_Store
 lib/game.js
+lib/server.js
 node_modules

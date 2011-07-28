@@ -19,7 +19,7 @@ initJigLib = ->
   system.setGravity([0,-9.8,0,0])
   system.setSolverType('ACCUMULATED')
 
-  ground = new jigLib.JPlane(null,[0, 0, 0, 0])
+  ground = new jigLib.JPlane(null,[0, 1, 0, 0])
   ground.set_friction(10)
   system.addBody(ground)
   ground.moveTo([0,0,0,0])

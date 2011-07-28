@@ -3,14 +3,35 @@ scene = ''
 renderer = ''
 player = ''
 enemy = ''
-socket = io.connect('http://192.168.2.46:1234');
+box = ''
+socket = io.connect('http://192.168.2.46:1234')
+
+system = jigLib.PhysicsSystem.getInstance()
 
 window.onload = ->
-  init()
+  initJigLib()
+  initThree()
   animate()
   register()
 
-init = ->
+initJigLib = ->
+  system.setGravity([0,-9.8,0,0])
+  system.setSolverType('ACCUMULATED')
+
+  ground = new jigLib.JPlane(null,[0, 0, 0, 0])
+  ground.set_friction(10)
+  system.addBody(ground)
+  ground.moveTo([0,0,0,0])
+
+  box = new jigLib.JBox(null, 100, 100, 0)
+  box.set_mass(50)
+  box.moveTo([0, 200, 0, 0])
+  box.set_movable(true)
+  system.addBody(box)
+
+  console.log box
+
+initThree = ->
   width = 600
   height = 600
 
@@ -25,8 +46,17 @@ init = ->
 
   player = new THREE.Mesh( geometry, player_material )
   enemy = new THREE.Mesh( geometry, enemy_material )
+  player.position.y = 25
+  enemy.position.y = 25
   scene.addObject( enemy )
   scene.addObject( player )
+
+  geometry = new THREE.Geometry()
+  geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -1000, 0, 0 ) ) )
+  geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( 1000, 0, 0 ) ) )
+  line_material = new THREE.LineBasicMaterial(  color: 0x000000, opacity: 0.2  )
+  line = new THREE.Line( geometry, line_material )
+  scene.addObject( line )
 
   renderer = new THREE.WebGLRenderer()
   renderer.setSize( width, height )
@@ -35,6 +65,8 @@ init = ->
 
 animate = ->
   requestAnimationFrame( animate )
+  console.log box._boundingBox
+
   renderer.render( scene, camera )
 
 register = ->
@@ -50,7 +82,7 @@ register = ->
         player.position.x += step
       when 40 # down
         player.position.y += -1 * step
-    socket.emit('position_update', { x: player.position.x, y: player.position.y })
+    socket.emit('position_update',  x: player.position.x, y: player.position.y )
   socket.on 'message', ( position ) ->
     enemy.position.x = position.x
     enemy.position.y = position.y

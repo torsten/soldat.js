@@ -4,6 +4,7 @@ renderer = ''
 player = ''
 enemy = ''
 box = ''
+lasttime = (new Date()).getTime()
 socket = io.connect('http://192.168.2.46:1234')
 
 system = jigLib.PhysicsSystem.getInstance()
@@ -28,8 +29,6 @@ initJigLib = ->
   box.moveTo([0, 200, 0, 0])
   box.set_movable(true)
   system.addBody(box)
-
-  console.log box
 
 initThree = ->
   width = 600
@@ -65,8 +64,11 @@ initThree = ->
 
 animate = ->
   requestAnimationFrame( animate )
-  console.log box._boundingBox
-
+  now = (new Date()).getTime()
+  inttime = (now - lasttime) / 10000
+  system.integrate(inttime)
+  player.position.x = box._boundingBox._maxPos[0]
+  player.position.y = box._boundingBox._maxPos[1]
   renderer.render( scene, camera )
 
 register = ->

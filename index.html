@@ -5,44 +5,11 @@
   <title>Soldat</title>
   <script src="lib/jquery.min.js"></script>
   <script src="http://192.168.2.46:1234/socket.io/socket.io.js"></script>
-  <script src="lib/sylvester.src.js"></script>
-  <script src="lib/glUtils.js"></script>
+  <script src="lib/three.min.js"></script>
+  <script src="lib/resquest_animation_frame.js"></script>
   <script src="lib/game.js"></script>
-  <script id="shader-fs" type="x-shader/x-fragment">
-    #ifdef GL_ES
-    precision highp float;
-    #endif
-
-    varying vec2 vTextureCoord;
-
-    uniform sampler2D uSampler;
-
-    void main(void) {
-      gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-    }
-  </script>
-
-  <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec2 aTextureCoord;
-
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-
-    varying vec2 vTextureCoord;
-
-    void main(void) {
-      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-      vTextureCoord = aTextureCoord;
-    }
-  </script>
 </head>
 <body>
-  <p>&nbsp;</p>
-  <p>Use arrows to move player one and wasd for player two.</p>
-  <p>Current position: [<span id='position'>0, 0</span>]</p>
-  <p>Enemy position:   [<span id='enemy_position'>0, 0</span>]</p>
-  <canvas id="glcanvas" width="640" height="480"></canvas>
 </body>
 </html>
 

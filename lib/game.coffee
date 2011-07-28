@@ -41,9 +41,9 @@ initThree = ->
 
   geometry = new THREE.CubeGeometry( 50, 50, 0 )
   enemy_material = new THREE.MeshBasicMaterial( color: 0xff0000, wireframe: true )
-  player_material = new THREE.MeshBasicMaterial( color: 0x00ff00, wireframe: true )
+  player_material = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/soldier.gif' ) } )
 
-  player = new THREE.Mesh( geometry, player_material )
+  player = new THREE.Mesh( new THREE.CubeGeometry( 84, 74, 0 ), player_material )
   enemy = new THREE.Mesh( geometry, enemy_material )
   player.position.y = 25
   enemy.position.y = 25

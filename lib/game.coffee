@@ -2,6 +2,7 @@ camera = ''
 scene = ''
 renderer = ''
 player = ''
+player_copy = ''
 enemy = ''
 box = ''
 lasttime = (new Date()).getTime()
@@ -24,7 +25,7 @@ initJigLib = ->
   system.addBody(ground)
   ground.moveTo([0,0,0,0])
 
-  box = new jigLib.JBox(null, 100, 100, 0)
+  box = new jigLib.JBox(null, 84, 74, 0)
   box.set_mass(50)
   box.moveTo([0, 200, 0, 0])
   box.set_movable(true)
@@ -44,11 +45,13 @@ initThree = ->
   player_material = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'images/soldier.gif' ) } )
 
   player = new THREE.Mesh( new THREE.CubeGeometry( 84, 74, 0 ), player_material )
+  player_copy = new THREE.Mesh( new THREE.CubeGeometry( 84, 74, 0 ), new THREE.MeshBasicMaterial( color: 0x00ff00, wireframe: true ) )
   enemy = new THREE.Mesh( geometry, enemy_material )
   player.position.y = 25
   enemy.position.y = 25
   scene.addObject( enemy )
   scene.addObject( player )
+  scene.addObject( player_copy )
 
   geometry = new THREE.Geometry()
   geometry.vertices.push( new THREE.Vertex( new THREE.Vector3( -1000, 0, 0 ) ) )
@@ -57,7 +60,7 @@ initThree = ->
   line = new THREE.Line( geometry, line_material )
   scene.addObject( line )
 
-  renderer = new THREE.WebGLRenderer()
+  renderer = new THREE.WebGLRenderer(canvas: $('canvas')[0])
   renderer.setSize( width, height )
 
   document.body.appendChild( renderer.domElement )
@@ -67,9 +70,14 @@ animate = ->
   now = (new Date()).getTime()
   inttime = (now - lasttime) / 10000
   system.integrate(inttime)
-  player.position.x = box._boundingBox._maxPos[0]
-  player.position.y = box._boundingBox._maxPos[1]
+  player.position.x = box.get_currentState().position[0]
+  player.position.y = box.get_currentState().position[1] + 74/2
+  player_copy.position.x = box.get_currentState().position[0]
+  player_copy.position.y = box.get_currentState().position[1] + 74/2
+
   renderer.render( scene, camera )
+  $('#player_position').text(player.position.x + ', ' + player.position.y)
+  $('#enemy_position').text(enemy.position.x + ', ' + enemy.position.y)
 
 register = ->
   step = 50
@@ -77,13 +85,35 @@ register = ->
     k = event.keyCode || event.which
     switch k
       when 37 # left
-        player.position.x += -1 * step
+        console.log('left')
+        box.addBodyForce(
+          [-1000, 0, 0],
+          null
+        )
       when 38 # up
-        player.position.y += step
+        console.log('up')
+        box.addBodyForce(
+          [0, 10000, 0],
+          [0,0,0]
+        )
       when 39 # right
-        player.position.x += step
+        console.log('right')
+        box.addBodyForce(
+          [-1000, 0, 0],
+          [0,0,0]
+        )
       when 40 # down
-        player.position.y += -1 * step
+        console.log('down')
+        box.addBodyForce(
+          [0, -1000, 0],
+          [0,0,0]
+        )
+      when 82
+        console.log('respawn')
+        box.moveTo([0, 200, 0, 0])
+        animate()
+
+
     socket.emit('position_update',  x: player.position.x, y: player.position.y )
   socket.on 'message', ( position ) ->
     enemy.position.x = position.x

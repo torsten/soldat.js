@@ -83,36 +83,29 @@ register = ->
   step = 50
   $('body').keydown (event) =>
     k = event.keyCode || event.which
+    force = 50
+    origin = [player.position.x, player.position.y,0]
     switch k
       when 37 # left
         console.log('left')
-        box.addBodyForce(
-          [-1000, 0, 0],
-          null
-        )
+        origin = [player.position.x+20, player.position.y,0]
+        box.setVelocity( [-1*force, 0, 0] )
       when 38 # up
         console.log('up')
-        box.addBodyForce(
-          [0, 10000, 0],
-          [0,0,0]
-        )
+        origin = [player.position.x, player.position.y - 20, 0]
+        box.setVelocity( [0, force, 0] )
       when 39 # right
         console.log('right')
-        box.addBodyForce(
-          [-1000, 0, 0],
-          [0,0,0]
-        )
+        origin = [player.position.x-20, player.position.y,0]
+        box.setVelocity( [force, 0, 0] )
       when 40 # down
         console.log('down')
-        box.addBodyForce(
-          [0, -1000, 0],
-          [0,0,0]
-        )
-      when 82
+        origin = [player.position.x, player.position.y + 20,0]
+        box.setVelocity( [0, -1*force, 0] )
+      when 82 # r
         console.log('respawn')
         box.moveTo([0, 200, 0, 0])
         animate()
-
 
     socket.emit('position_update',  x: player.position.x, y: player.position.y )
   socket.on 'message', ( position ) ->

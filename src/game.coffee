@@ -1,7 +1,7 @@
 # game = null
 context = null
 player = null
-bullet = null
+bullets = []
 
 window.addEventListener 'keyup', ((event) -> Key.onKeyup(event)), false
 window.addEventListener 'keydown', ((event) -> Key.onKeydown(event)), false
@@ -123,8 +123,7 @@ class Player
     vx = dx / length * bs
     vy = dy / length * bs
 
-    console.log "3: #{vx}/#{vy}"
-    bullet = new Bullet(px, py, vx, vy)
+    bullets.push new Bullet(px, py, vx, vy)
     return true
 
   on_ground: ->
@@ -139,7 +138,8 @@ tick = ->
 
 animate = ->
   player.update()
-  bullet.update()
+  for bullet in bullets
+    bullet.update()
 
 draw = ->
   context.clearRect(0, 0, 800, 500)
@@ -151,7 +151,7 @@ draw = ->
     img.src = 'images/soldier.gif'
   context.drawImage(img, player.x, player.y, 43, 37)
 
-  if bullet
+  for bullet in bullets
     context.beginPath()
     context.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
     context.fillStyle = 'rbg(0,0,0)'

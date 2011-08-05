@@ -10,13 +10,11 @@ Install node, npm and socket.io:
     $ curl http://npmjs.org/install.sh | sh
     $ npm install socket.io
 
+Compile CoffeeScript files to JavaScript.
+
+    $ coffee -cwo lib src/*.coffee
+
 Start server:
 
     $ node lib/server.js
-
-## Helper
-
-Compile CoffeeScript file to JavaScript.
-
-    $ coffee -c lib/game.coffee
 

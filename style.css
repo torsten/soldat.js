@@ -1,0 +1,6 @@
+canvas {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  cursor: url(images/crosshair.cur), crosshair;
+}

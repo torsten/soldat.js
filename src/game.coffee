@@ -153,6 +153,9 @@ draw = ->
     img.src = 'images/soldier.gif'
   context.drawImage(img, player.x, player.y, 43, 37)
 
+  # print position
+  context.fillText(parseInt(player.x) + ':' + parseInt(player.y), 10, 25)
+
   for bullet in bullets
     context.beginPath()
     context.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
@@ -179,4 +182,5 @@ initScene = ->
   document.body.appendChild(main_canvas)
   context = main_canvas.getContext('2d')
   # Game.context = main_contaxt
+  context.font = "20pt Helvetica"
 

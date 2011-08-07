@@ -124,6 +124,8 @@ class Player
     vy = dy / length * bs
 
     bullets.push new Bullet(px, py, vx, vy)
+    sound = new Audio("sounds/shoot.mp3")
+    sound.play()
     return true
 
   on_ground: ->

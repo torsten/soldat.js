@@ -65,6 +65,9 @@ class Player
     gy = 981
     bx = 4000
 
+    max_speed = 500
+    max_height = 458
+
     @y = @y + @vy * t
     @vy = @vy + gy * t
 
@@ -87,15 +90,15 @@ class Player
       else
         @vx = @vx + (@ax * t) + (bx * t)
 
-    if @y >= 458
-      @y = 458
+    if @y >= max_height
+      @y = max_height
       @vy = 0
 
-    if @vx >= 500
-      @vx = 500
+    if @vx >= max_speed
+      @vx = max_speed
 
-    if @vx <= -500
-      @vx = -500
+    if @vx <= -1 * max_speed
+      @vx = -1 * max_speed
 
   moveUp: (vy) ->
     return unless this.on_ground()

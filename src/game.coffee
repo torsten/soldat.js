@@ -147,8 +147,9 @@ animate = ->
   img.src = 'images/soldier.gif'
   game.stage.drawImage(img, game.player.x, game.player.y, 43, 37)
 
-  # print position
-  context.fillText(parseInt(player.x) + ':' + parseInt(player.y), 10, 25)
+  # print player position
+  text = parseInt(game.player.x) + ':' + parseInt(game.player.y)
+  game.stage.fillText(text, 10, 25)
 
   # draw bullets
   for bullet in game.bullets

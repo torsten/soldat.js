@@ -1,56 +1,31 @@
-# game = null
-context = null
-player = null
-bullets = []
+game = null
+
+window.onload = ->
+  stage = initStage()
+  initGame(stage)
+  tick()
+  return
 
 window.addEventListener 'keyup', ((event) -> Key.onKeyup(event)), false
 window.addEventListener 'keydown', ((event) -> Key.onKeydown(event)), false
 window.addEventListener 'mousemove', ((event) -> Mouse.onMousemove(event)), false
-window.addEventListener 'mousedown', (-> player.shoot()), false # TODO player.shoot may not defined yet
+window.addEventListener 'mousedown', (-> game.player.shoot()), false
 
-window.onload = ->
-  initScene()
-  player = new Player(100, 240)
-  tick()
-  return
-
-Mouse =
-  constructor: (@x = 0, @y = 0) ->
-
-  onMousemove: (event) ->
-    @x = event.pageX
-    @y = event.pageY
-    return true
-
-Key =
-  UP: 87    # 38, 87
-  RIGHT: 68 # 39, 68
-  DOWN: 83  # 40, 83
-  LEFT: 65  # 37, 65
-
-  held_down: {}
-
-  pressed: (keyCode) ->
-    this.held_down[keyCode]
-
-  onKeyup: (event) ->
-    delete this.held_down[event.keyCode]
-
-  onKeydown: (event) ->
-    this.held_down[event.keyCode] = true
-
-class Bullet
-  constructor: (@x, @y, @vx, @vy) ->
-
-  update: ->
-    @x = @x + @vx
-    @y = @y + @vy
+class Game
+  constructor: (@stage, @player = new Player(), @bullets = [], @ground = 458) ->
 
 class Player
-  constructor: (@x, @y, @vx = 0, @vy = 0, @ax = 0) ->
+  constructor: (@x = 100, @y = 240) ->
+
+  t = 0.01
+  gy = 1000 # gravity
+  bx = 4000
+  vx = 0    # velocity x
+  vy = 0    # velocity y
+  ax = 0
 
   update: ->
-    @ax = 0
+    ax = 0
 
     if Key.pressed(Key.UP)
       this.moveUp(500)
@@ -61,54 +36,43 @@ class Player
     if Key.pressed(Key.LEFT)
       this.moveLeft(1000)
 
-    t = 0.01
-    gy = 981
-    bx = 4000
+    @y = @y + vy * t
+    @x = @x + vx * t
 
-    max_speed = 500
-    max_height = 458
+    vy = vy + gy * t
 
-    @y = @y + @vy * t
-    @vy = @vy + gy * t
-
-    @x = @x + @vx * t
-
-    if @vx > 0 && @ax <= 0
+    if vx > 0 && ax <= 0
       bx = Math.abs(bx) * -1
-    else if @vx < 0 && @ax >= 0
+    else if vx < 0 && ax >= 0
       bx = Math.abs(bx)
     else
-       bx = 0
+      bx = 0
 
-    if !this.on_ground()
-      if @ax == 0
-        bx = 0
-      @vx = @vx + (@ax * t) + (bx * t)
-    else
-      if Math.abs(bx * t) > Math.abs(@vx) && @ax == 0
-        @vx = 0
+    if this.onGround()
+      @y = game.ground
+      vy = 0
+      if Math.abs(bx * t) > Math.abs(vx) && ax == 0
+        vx = 0
       else
-        @vx = @vx + (@ax * t) + (bx * t)
+        vx = vx + (ax * t) + (bx * t)
+    else
+      if ax == 0
+        bx = 0
+      vx = vx + (ax * t) + (bx * t)
 
-    if @y >= max_height
-      @y = max_height
-      @vy = 0
+  moveUp: (_vy) ->
+    return unless this.onGround()
+    vy = _vy * -1
 
-    if @vx >= max_speed
-      @vx = max_speed
+  moveRight: (_ax) ->
+    ax = _ax
 
-    if @vx <= -1 * max_speed
-      @vx = -1 * max_speed
+  moveLeft: (_ax) ->
+    ax = _ax * -1
 
-  moveUp: (vy) ->
-    return unless this.on_ground()
-    @vy = vy * -1
-
-  moveRight: (ax) ->
-    @ax = ax
-
-  moveLeft: (ax) ->
-    @ax = ax * -1
+  onGround: ->
+    return true if @y >= game.ground
+    false
 
   shoot: ->
     px = @x + 20
@@ -126,67 +90,89 @@ class Player
     vx = dx / length * bs
     vy = dy / length * bs
 
-    bullets.push new Bullet(px, py, vx, vy)
-
     # sound
-    sound = new Audio("sounds/shoot.mp3")
+    sound = new Audio('sounds/shoot.mp3')
     sound.play()
 
+    game.bullets.push new Bullet(px, py, vx, vy)
     return true
 
-  on_ground: ->
-    return true if @y >= 458
-    false
+class Bullet
+  constructor: (@x, @y, @vx, @vy) ->
+
+  update: ->
+    @x += @vx
+    @y += @vy
+
+Mouse =
+  constructor: (@x = 0, @y = 0) ->
+
+  onMousemove: (event) ->
+    @x = event.pageX
+    @y = event.pageY
+    return true
+
+Key =
+  # 38, 87
+  # 39, 68
+  # 40, 83
+  # 37, 65
+  UP: 87
+  RIGHT: 68
+  DOWN: 83
+  LEFT: 65
+
+  held_down: {}
+
+  pressed: (keyCode) ->
+    this.held_down[keyCode]
+
+  onKeyup: (event) ->
+    delete this.held_down[event.keyCode]
+
+  onKeydown: (event) ->
+    this.held_down[event.keyCode] = true
 
 tick = ->
   requestAnimationFrame(tick)
-  draw()
   animate()
   return
 
 animate = ->
-  player.update()
-  for bullet in bullets
-    bullet.update()
+  game.stage.clearRect(0, 0, 800, 500)
+  game.player.update()
 
-draw = ->
-  context.clearRect(0, 0, 800, 500)
-
+  # draw player
   img = new Image()
-  if player.ax < 0 || player.vx < 0
-    img.src = 'images/soldier-flip.gif'
-  else
-    img.src = 'images/soldier.gif'
-  context.drawImage(img, player.x, player.y, 43, 37)
+  img.src = 'images/soldier.gif'
+  game.stage.drawImage(img, game.player.x, game.player.y, 43, 37)
 
   # print position
   context.fillText(parseInt(player.x) + ':' + parseInt(player.y), 10, 25)
 
-  for bullet in bullets
-    context.beginPath()
-    context.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
-    context.fillStyle = 'rbg(0,0,0)'
-    context.fill()
+  # draw bullets
+  for bullet in game.bullets
+    bullet.update()
 
-initScene = ->
-  bg_canvas = document.createElement('canvas')
-  bg_canvas.id = 'bg'
-  bg_canvas.width = 800
-  bg_canvas.height = 500
-  # bg_canvas.style = 'z-index: 1'
-  bg_context = bg_canvas.getContext('2d')
-  bg = new Image()
-  bg.src = 'images/bg.png'
-  bg_context.drawImage(bg, 0, 0)
-  document.body.appendChild(bg_canvas)
+  return
 
-  main_canvas = document.createElement('canvas')
-  main_canvas.id = 'main'
-  main_canvas.width = 800
-  main_canvas.height = 500
-  # main_canvas.style = 'z-index: 2'
-  document.body.appendChild(main_canvas)
-  context = main_canvas.getContext('2d')
-  # Game.context = main_contaxt
-  context.font = "20pt Helvetica"
+initGame = (stage) ->
+  game = new Game(stage)
+  return
+
+initStage = ->
+  bg = createCanvas('bg')
+  bg_img = new Image()
+  bg_img.src = 'images/bg.png'
+  bg.drawImage(bg_img, 0, 0)
+
+  createCanvas('stage')
+
+createCanvas = (id) ->
+  canvas = document.createElement('canvas')
+  canvas.id = id
+  canvas.width = 800
+  canvas.height = 500
+  document.body.appendChild(canvas)
+  canvas.getContext('2d')
 

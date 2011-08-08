@@ -1,86 +1,83 @@
-game = null
-
 window.onload = ->
   stage = initStage()
-  initGame(stage)
-  tick()
-  return
+  Game.initialize(stage)
+  Game.tick()
 
 window.addEventListener 'keyup', ((event) -> Key.onKeyup(event)), false
 window.addEventListener 'keydown', ((event) -> Key.onKeydown(event)), false
 window.addEventListener 'mousemove', ((event) -> Mouse.onMousemove(event)), false
-window.addEventListener 'mousedown', (-> game.player.shoot()), false
+window.addEventListener 'mousedown', (-> Game.player.shoot()), false
 
-Game = ->
-  constructor: ->
-    @stage
+Game =
+  bullets: []
+  ground: 458
+
+  initialize: (stage) ->
+    @stage = stage
     @player = Player
-    @bullets = []
-    @ground = 458
 
-Player = ->
-  constructor: (@x = 100, @y = 240) ->
+  run: ->
+    skipTicks = 1000 / 60
+    nextGameTick = (new Date).getTime()
 
-  t = 0.01
-  gy = 1000 # gravity
-  bx = 4000
-  vx = 0    # velocity x
-  vy = 0    # velocity y
-  ax = 0
+    (->
+      while (new Date).getTime() > nextGameTick
+        Game.update()
+        nextGameTick += skipTicks
+
+      Game.draw()
+    )()
+
+  draw: ->
+    Game.stage.clearRect(0, 0, 800, 500)
+
+    # player
+    img = new Image()
+    img.src = 'images/soldier.gif'
+    Game.stage.drawImage(img, Game.player.x, Game.player.y, 43, 37)
+
+    # bullets
+    for bullet in Game.bullets
+      Game.stage.beginPath()
+      Game.stage.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
+      Game.stage.fillStyle = 'rbg(0, 0, 0)'
+      Game.stage.fill()
 
   update: ->
-    ax = 0
+    # player
+    Game.player.update()
 
+    # bullets
+    for bullet in Game.bullets
+      bullet.update()
+
+  tick: ->
+    requestAnimationFrame(Game.tick)
+    Game.run()
+
+Player =
+  x: 100
+  y: 240
+
+  update: ->
     if Key.pressed(Key.UP)
-      this.moveUp(500)
+      this.moveUp()
 
     if Key.pressed(Key.RIGHT)
-      this.moveRight(1000)
+      this.moveRight()
 
     if Key.pressed(Key.LEFT)
-      this.moveLeft(1000)
+      this.moveLeft()
 
-    @y = @y + vy * t
-    @x = @x + vx * t
+  moveUp: ->
 
-    vy = vy + gy * t
+  moveRight: ->
 
-    if vx > 0 && ax <= 0
-      bx = Math.abs(bx) * -1
-    else if vx < 0 && ax >= 0
-      bx = Math.abs(bx)
-    else
-      bx = 0
-
-    if this.onGround()
-      @y = game.ground
-      vy = 0
-      if Math.abs(bx * t) > Math.abs(vx) && ax == 0
-        vx = 0
-      else
-        vx = vx + (ax * t) + (bx * t)
-    else
-      if ax == 0
-        bx = 0
-      vx = vx + (ax * t) + (bx * t)
-
-  moveUp: (_vy) ->
-    return unless this.onGround()
-    vy = _vy * -1
-
-  moveRight: (_ax) ->
-    ax = _ax
-
-  moveLeft: (_ax) ->
-    ax = _ax * -1
-
-  onGround: ->
-    return true if @y >= game.ground
-    false
+  moveLeft: ->
 
   shoot: ->
-    px = @x + 20
-    py = @y + 20
+    px = this.x + 20
+    py = this.y + 20
     mx = Mouse.x
     my = Mouse.y
 
@@ -98,7 +95,7 @@ Player = ->
     sound = new Audio('sounds/shoot.mp3')
     sound.play()
 
-    game.bullets.push new Bullet(px, py, vx, vy)
+    Game.bullets.push new Bullet(px, py, vx, vy)
     return true
 
 class Bullet
@@ -108,15 +105,16 @@ class Bullet
     @x += @vx
     @y += @vy
 
-Mouse = ->
-  constructor: (@x = 0, @y = 0) ->
+Mouse =
+  x: 0
+  y: 0
 
   onMousemove: (event) ->
-    @x = event.pageX
-    @y = event.pageY
+    Mouse.x = event.pageX
+    Mouse.y = event.pageY
     return true
 
-Key = ->
+Key =
   UP: 87
   RIGHT: 68
   DOWN: 83
@@ -133,39 +131,14 @@ Key = ->
   onKeydown: (event) ->
     this.held_down[event.keyCode] = true
 
-tick = ->
-  requestAnimationFrame(tick)
-  animate()
-  return
-
-animate = ->
-  game.stage.clearRect(0, 0, 800, 500)
-  game.player.update()
-
-  # draw player
-  img = new Image()
-  img.src = 'images/soldier.gif'
-  game.stage.drawImage(img, game.player.x, game.player.y, 43, 37)
-
-  # print player position
-  text = parseInt(game.player.x) + ':' + parseInt(game.player.y)
-  game.stage.fillText(text, 10, 25)
-
-  # draw bullets
-  for bullet in game.bullets
-    bullet.update()
-
-  return
-
-initGame = (stage) ->
-  game = Game(stage)
-
 initStage = ->
-  bg = createCanvas('bg')
+  # background
+  bg = createCanvas('background')
   bg_img = new Image()
   bg_img.src = 'images/bg.png'
   bg.drawImage(bg_img, 0, 0)
 
+  # stage
   createCanvas('stage')
 
 createCanvas = (id) ->

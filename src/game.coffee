@@ -11,10 +11,14 @@ window.addEventListener 'keydown', ((event) -> Key.onKeydown(event)), false
 window.addEventListener 'mousemove', ((event) -> Mouse.onMousemove(event)), false
 window.addEventListener 'mousedown', (-> game.player.shoot()), false
 
-class Game
-  constructor: (@stage, @player = new Player(), @bullets = [], @ground = 458) ->
+Game = ->
+  constructor: ->
+    @stage
+    @player = Player
+    @bullets = []
+    @ground = 458
 
-class Player
+Player = ->
   constructor: (@x = 100, @y = 240) ->
 
   t = 0.01
@@ -104,7 +108,7 @@ class Bullet
     @x += @vx
     @y += @vy
 
-Mouse =
+Mouse = ->
   constructor: (@x = 0, @y = 0) ->
 
   onMousemove: (event) ->
@@ -112,11 +116,7 @@ Mouse =
     @y = event.pageY
     return true
 
-Key =
-  # 38, 87
-  # 39, 68
-  # 40, 83
-  # 37, 65
+Key = ->
   UP: 87
   RIGHT: 68
   DOWN: 83
@@ -157,8 +157,7 @@ animate = ->
   return
 
 initGame = (stage) ->
-  game = new Game(stage)
-  return
+  game = Game(stage)
 
 initStage = ->
   bg = createCanvas('bg')

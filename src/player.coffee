@@ -5,7 +5,7 @@ Player =
   vy: 0
   ax: 0
 
-  update: ->
+  update: (delta) ->
     @ax = 0
 
     t = 0.01

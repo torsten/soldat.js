@@ -1,4 +1,4 @@
-DEBUG = true
+DEBUG = false
 stats = null
 
 window.onload = ->
@@ -20,6 +20,7 @@ Game =
   initialize: (stage) ->
     @stage = stage
     @player = Player
+    @lastTick = +new Date
 
   draw: ->
     @stage.clearRect(0, 0, 800, 500)
@@ -43,19 +44,21 @@ Game =
       @stage.fillStyle = 'rbg(0, 0, 0)'
       @stage.fill()
 
-  update: ->
+  update: (delta) ->
     # player
-    @player.update()
+    @player.update(delta)
 
     # bullets
     for bullet in @bullets
-      bullet.update()
+      bullet.update(delta)
 
   tick: ->
     requestAnimationFrame(Game.tick)
     stats.update() if DEBUG
 
-    Game.update()
+    delta = +new Date - Game.lastTick
+    Game.lastTick = +new Date
+    Game.update(delta)
     Game.draw()
 
 initStage = ->
@@ -74,7 +77,9 @@ createCanvas = (id) ->
   canvas.width = 800
   canvas.height = 500
   document.body.appendChild(canvas)
-  canvas.getContext('2d')
+  context = canvas.getContext('2d')
+  context.clearRect(0, 0, 800, 500)
+  context
 
 drawStats = ->
   stats = new Stats()

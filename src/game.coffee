@@ -22,38 +22,38 @@ Game =
 
     (->
       while (new Date).getTime() > nextGameTick
-        Game.update()
+        @update()
         nextGameTick += skipTicks
 
-      Game.draw()
+      @draw()
     )()
 
   draw: ->
-    Game.stage.clearRect(0, 0, 800, 500)
+    @stage.clearRect(0, 0, 800, 500)
 
     # player
     img = new Image()
     img.src = 'images/soldier.gif'
-    Game.stage.drawImage(img, Game.player.x, Game.player.y, 43, 37)
+    @stage.drawImage(img, @player.x, @player.y, 43, 37)
 
     # bullets
-    for bullet in Game.bullets
-      Game.stage.beginPath()
-      Game.stage.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
-      Game.stage.fillStyle = 'rbg(0, 0, 0)'
-      Game.stage.fill()
+    for bullet in @bullets
+      @stage.beginPath()
+      @stage.arc(bullet.x, bullet.y, 2, 0, 2*Math.PI, false)
+      @stage.fillStyle = 'rbg(0, 0, 0)'
+      @stage.fill()
 
   update: ->
     # player
-    Game.player.update()
+    @player.update()
 
     # bullets
-    for bullet in Game.bullets
+    for bullet in @bullets
       bullet.update()
 
   tick: ->
-    requestAnimationFrame(Game.tick)
-    Game.run()
+    requestAnimationFrame(@tick)
+    @run()
 
 Player =
   x: 100
@@ -76,8 +76,8 @@ Player =
   moveLeft: ->
 
   shoot: ->
-    px = this.x + 20
-    py = this.y + 20
+    px = @x + 20
+    py = @y + 20
     mx = Mouse.x
     my = Mouse.y
 
@@ -110,8 +110,8 @@ Mouse =
   y: 0
 
   onMousemove: (event) ->
-    Mouse.x = event.pageX
-    Mouse.y = event.pageY
+    @x = event.pageX
+    @y = event.pageY
     return true
 
 Key =
@@ -123,13 +123,13 @@ Key =
   held_down: {}
 
   pressed: (keyCode) ->
-    this.held_down[keyCode]
+    @held_down[keyCode]
 
   onKeyup: (event) ->
-    delete this.held_down[event.keyCode]
+    delete @held_down[event.keyCode]
 
   onKeydown: (event) ->
-    this.held_down[event.keyCode] = true
+    @held_down[event.keyCode] = true
 
 initStage = ->
   # background

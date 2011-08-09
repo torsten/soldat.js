@@ -1,7 +1,9 @@
+DEBUG = true
 stats = null
 
 window.onload = ->
-  drawStats()
+  drawStats() if DEBUG
+
   stage = initStage()
   Game.initialize(stage)
   Game.tick()
@@ -31,7 +33,8 @@ Game =
     @stage.drawImage(img, @player.x, @player.y, 43, 37)
 
     # position
-    @stage.fillText(parseInt(@player.x) + ':' + parseInt(@player.y), 10, 25)
+    if DEBUG
+      @stage.fillText(parseInt(@player.x) + ':' + parseInt(@player.y), 10, 25)
 
     # bullets
     for bullet in @bullets
@@ -50,7 +53,7 @@ Game =
 
   tick: ->
     requestAnimationFrame(Game.tick)
-    stats.update()
+    stats.update() if DEBUG
 
     Game.update()
     Game.draw()

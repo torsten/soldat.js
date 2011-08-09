@@ -22,10 +22,10 @@ Game =
 
     (->
       while (new Date).getTime() > nextGameTick
-        @update()
+        Game.update()
         nextGameTick += skipTicks
 
-      @draw()
+      Game.draw()
     )()
 
   draw: ->
@@ -51,9 +51,9 @@ Game =
     for bullet in @bullets
       bullet.update()
 
-  tick: ->
-    requestAnimationFrame(@tick)
-    @run()
+  tick: =>
+    requestAnimationFrame(Game.tick)
+    Game.run()
 
 Player =
   x: 100

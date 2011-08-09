@@ -16,25 +16,19 @@ Game =
     @stage = stage
     @player = Player
 
-  run: ->
-    skipTicks = 1000 / 60
-    nextGameTick = (new Date).getTime()
-
-    (->
-      while (new Date).getTime() > nextGameTick
-        Game.update()
-        nextGameTick += skipTicks
-
-      Game.draw()
-    )()
-
   draw: ->
     @stage.clearRect(0, 0, 800, 500)
 
     # player
     img = new Image()
-    img.src = 'images/soldier.gif'
+    if @player.ax < 0 || @player.vx < 0
+      img.src = 'images/soldier-flip.gif'
+    else
+      img.src = 'images/soldier.gif'
     @stage.drawImage(img, @player.x, @player.y, 43, 37)
+
+    # position
+    @stage.fillText(parseInt(@player.x) + ':' + parseInt(@player.y), 10, 25)
 
     # bullets
     for bullet in @bullets
@@ -51,29 +45,83 @@ Game =
     for bullet in @bullets
       bullet.update()
 
-  tick: =>
+  tick: ->
     requestAnimationFrame(Game.tick)
-    Game.run()
+
+    Game.update()
+    Game.draw()
 
 Player =
   x: 100
   y: 240
+  vx: 0
+  vy: 0
+  ax: 0
 
   update: ->
+    @ax = 0
+
+    t = 0.01
+    gy = 981
+    bx = 4000
+
+    max_speed = 500
+    max_height = 458
+
     if Key.pressed(Key.UP)
-      this.moveUp()
+      this.moveUp(500)
 
     if Key.pressed(Key.RIGHT)
-      this.moveRight()
+      this.moveRight(1000)
 
     if Key.pressed(Key.LEFT)
-      this.moveLeft()
+      this.moveLeft(1000)
 
-  moveUp: ->
+    @y = @y + @vy * t
+    @vy = @vy + gy * t
 
-  moveRight: ->
+    @x = @x + @vx * t
 
-  moveLeft: ->
+    if @vx > 0 && @ax <= 0
+      bx = Math.abs(bx) * -1
+    else if @vx < 0 && @ax >= 0
+      bx = Math.abs(bx)
+    else
+       bx = 0
+
+    if !this.onGround()
+      if @ax == 0
+        bx = 0
+      @vx = @vx + (@ax * t) + (bx * t)
+    else
+      if Math.abs(bx * t) > Math.abs(@vx) && @ax == 0
+        @vx = 0
+      else
+        @vx = @vx + (@ax * t) + (bx * t)
+
+    if @y >= max_height
+      @y = max_height
+      @vy = 0
+
+    if @vx >= max_speed
+      @vx = max_speed
+
+    if @vx <= -1 * max_speed
+      @vx = -1 * max_speed
+
+  moveUp: (vy) ->
+    return unless this.onGround()
+    @vy = vy * -1
+
+  moveRight: (ax) ->
+    @ax = ax
+
+  moveLeft: (ax) ->
+    @ax = ax * -1
+
+  onGround: ->
+    return true if @y >= 458
+    false
 
   shoot: ->
     px = @x + 20

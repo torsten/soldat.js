@@ -1,6 +1,5 @@
 .DS_Store
-lib/utils.js
-lib/game.js
+lib/soldat.js
 lib/server.js
 node_modules
 

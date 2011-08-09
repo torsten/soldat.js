@@ -12,9 +12,10 @@ Install node, npm and socket.io:
 
 Compile CoffeeScript files to JavaScript.
 
-    $ coffee -cwo lib src/*.coffee
+    $ coffee -cj lib/soldat.js src/(^server).coffee
 
 Start server:
 
+    $ coffee -co lib src/server.coffee
     $ node lib/server.js
 

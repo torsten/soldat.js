@@ -1,4 +1,7 @@
+stats = null
+
 window.onload = ->
+  drawStats()
   stage = initStage()
   Game.initialize(stage)
   Game.tick()
@@ -47,6 +50,7 @@ Game =
 
   tick: ->
     requestAnimationFrame(Game.tick)
+    stats.update()
 
     Game.update()
     Game.draw()
@@ -196,4 +200,11 @@ createCanvas = (id) ->
   canvas.height = 500
   document.body.appendChild(canvas)
   canvas.getContext('2d')
+
+drawStats = ->
+  stats = new Stats()
+  stats.domElement.style.position = 'absolute'
+  stats.domElement.style.right = '0'
+  stats.domElement.style.top = '0'
+  document.body.appendChild(stats.domElement)
 

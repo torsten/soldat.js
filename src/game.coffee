@@ -10,8 +10,7 @@ window.onload = ->
 
 window.addEventListener 'keyup', ((event) -> Key.onKeyup(event)), false
 window.addEventListener 'keydown', ((event) -> Key.onKeydown(event)), false
-window.addEventListener 'mousemove', ((event) -> Mouse.onMousemove(event)), false
-window.addEventListener 'mousedown', (-> Game.player.shoot()), false
+window.addEventListener 'mousedown', ((event) -> Game.player.shoot(event)), false
 
 Game =
   bullets: []

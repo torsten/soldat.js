@@ -70,11 +70,11 @@ Player =
     return true if @y >= 458
     false
 
-  shoot: ->
+  shoot: (event) ->
     px = @x + 20
     py = @y + 20
-    mx = Mouse.x
-    my = Mouse.y
+    mx = event.pageX
+    my = event.pageY
 
     # direction
     dx = mx - px

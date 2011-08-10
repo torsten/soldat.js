@@ -1,12 +1,3 @@
-Mouse =
-  x: 0
-  y: 0
-
-  onMousemove: (event) ->
-    @x = event.pageX
-    @y = event.pageY
-    return true
-
 Key =
   UP: 87
   RIGHT: 68
